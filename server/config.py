@@ -2,10 +2,12 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env file from project root
-load_dotenv()
+# Project root directory
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-BASE_DIR = Path(__file__).resolve().parent
+# Load .env file from project root
+load_dotenv(BASE_DIR / ".env")
+
 TEMP_DIR = BASE_DIR / "temp"
 OUTPUT_DIR = BASE_DIR / "output_reels"
 

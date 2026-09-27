@@ -1,126 +1,275 @@
-# ⚡ YouTube to Viral Reels AI Pipeline
+# ⚡ ViralReel AI — YouTube to 9:16 Shorts & Reels Studio
 
-An automated AI pipeline that transforms long-form YouTube videos (podcasts, interviews, talks, tutorials) into viral 9:16 vertical Reels, Shorts, and TikToks.
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![FFmpeg](https://img.shields.io/badge/FFmpeg-007808?style=for-the-badge&logo=ffmpeg&logoColor=white)](https://ffmpeg.org)
+[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75C2?style=for-the-badge&logo=google&logoColor=white)](https://aistudio.google.com)
+[![Anthropic Claude](https://img.shields.io/badge/Anthropic%20Claude-D97757?style=for-the-badge&logo=anthropic&logoColor=white)](https://anthropic.com)
 
-Powered by **Gemini 2.5 Flash / Claude 3.7 Sonnet** for short-form retention analysis and **FFmpeg** for vertical reframing, hook overlays, and stylized burned-in captions.
+An automated AI pipeline that transforms long-form YouTube videos (podcasts, gaming streams, interviews, keynote talks) into high-retention 9:16 vertical Shorts, Reels, and TikToks. 
 
----
-
-## 🚀 Features
-
-- **Automated Virality Detection**:
-  - **The 3-Second Hook Rule**: Identifies high-curiosity opening statements, spicy questions, or counter-intuitive claims.
-  - **Retention & Emotional Pacing**: Filters out introductory filler, small talk, and pleasantries.
-  - **Standalone Cohesion**: Ensures the segment starts cleanly at the beginning of a sentence and ends with a complete takeaway or punchline.
-  - **Viral Score (1-100)**: Evaluates hook strength, emotional engagement, and shareability.
-- **Dual AI Engine Support**:
-  - Use **Google Gemini** (`gemini-2.5-flash` or `gemini-1.5-pro`) or **Anthropic Claude** (`claude-3-7-sonnet` or `claude-3-5-sonnet`), with automatic fallback.
-- **Vertical 9:16 Full-Width Letterboxing**:
-  - Preserves 100% of the video's full width with clean black bars on the top and bottom on a 9:16 vertical canvas.
-- **Direct YouTube Studio Upload**:
-  - Link your YouTube channel with Google OAuth 2.0.
-  - One-click publishing to **YouTube Shorts** with custom title, description, hashtags, and privacy settings (Public, Unlisted, Private).
-- **TikTok/Reels Stylized Captions & Banners (Optional)**:
-  - Toggleable burned-in subtitles and hook overlay headlines.
+It uses **Google Gemini** or **Anthropic Claude** to detect viral hooks, **FFmpeg** to render letterboxed 9:16 vertical videos at maximum native source resolution, and includes a **Modern Web Studio** with direct **1-click YouTube Shorts publishing**.
 
 ---
 
-## 🛠️ Quick Setup
+## ✨ Features
 
-### 1. Configure API Keys
-Open `.env` in the project root and add your API keys:
+- 🧠 **AI Virality Detection**:
+  - Analyzes timestamped transcripts for the **3-Second Hook Rule** (curiosity gaps, controversial claims, emotional peaks).
+  - Evaluates standalone value (clean sentence start, complete punchline/takeaway).
+  - Computes a Virality Score (1–100) and extracts key quotes.
+  - Supports **Google Gemini** (`gemini-2.5-flash` / `gemini-1.5-pro`) and **Anthropic Claude** (`claude-3-7-sonnet` / `claude-3-5-sonnet`) with automatic fallback.
 
-```bash
-# In /Users/anik/Desktop/ai-pipeline/.env
-GEMINI_API_KEY=your_actual_gemini_api_key
-ANTHROPIC_API_KEY=your_actual_anthropic_api_key
-```
+- 🎬 **Vertical 9:16 Full-Width Letterboxing**:
+  - Preserves **100% of the video's width** without cropping side details.
+  - Automatically centers the video with sleek top and bottom black bars on a 1080x1920 vertical canvas.
+  - Always downloads at the **maximum available resolution** (4K / 1440p / 1080p).
+  - Clean video output with no forced external subtitles or top banners.
 
-> **Note**: You only need **one** API key to get started (Gemini or Anthropic), or provide both to switch between them anytime.
+- 🌐 **Modern Web Studio UI**:
+  - Dark glassmorphic interface with real-time analysis logs.
+  - Interactive timeline adjuster to fine-tune start/end timestamps before rendering.
+  - Built-in 9:16 vertical player modal with immediate preview and download.
+  - Local reels library to manage past generations.
+
+- 🚀 **Direct YouTube Studio Integration**:
+  - Authenticate with your YouTube Channel via Google OAuth 2.0.
+  - Built-in **AI Copywriter** generates viral titles, hashtags, and descriptions with one click.
+  - Publish directly to **YouTube Shorts** with custom privacy settings (Public, Unlisted, Private).
+
+- 💻 **Rich CLI Alternative**:
+  - Full terminal interface with progress spinners, colorized tables, and dry-run mode.
 
 ---
 
-## 💻 How to Run
+## 📋 Prerequisites
 
-### 🌐 Option 1: Modern Web Studio (Recommended)
-Launch the browser UI to visually analyze moments, edit timestamps, preview 9:16 vertical clips, and download reels:
+Before installing the project, ensure you have the following installed on your system:
 
+### 1. Python 3.10 or Higher
+Check your Python version:
 ```bash
-.venv/bin/python run_web.py
+python3 --version
 ```
-Open **[http://localhost:8000](http://localhost:8000)** in your browser.
+
+### 2. FFmpeg (Required for video extraction and rendering)
+FFmpeg is required to cut, re-encode, and letterbox the video.
+
+- **macOS (via Homebrew):**
+  ```bash
+  brew install ffmpeg
+  ```
+
+- **Ubuntu / Debian Linux:**
+  ```bash
+  sudo apt update && sudo apt install -y ffmpeg
+  ```
+
+- **Windows:**
+  ```powershell
+  # Using winget
+  winget install Gyan.FFmpeg
+
+  # Or using Chocolatey
+  choco install ffmpeg
+  ```
+  *(Verify installation by running `ffmpeg -version` in your terminal)*.
+
+### 3. AI API Key (At least one required)
+- **Google Gemini API Key** (Free tier available): [Google AI Studio](https://aistudio.google.com/app/apikey)
+- **Anthropic Claude API Key**: [Anthropic Console](https://console.anthropic.com/)
 
 ---
 
-### ⌨️ Option 2: Command-Line Interface (CLI)
+## 🛠️ Step-by-Step Installation
 
-#### 1. Interactive CLI Run
-Run the pipeline without arguments to be prompted for a YouTube URL:
+### Step 1: Clone the Repository
 ```bash
-.venv/bin/python pipeline.py
+git clone https://github.com/YOUR_USERNAME/ai-pipeline.git
+cd ai-pipeline
 ```
 
-### 2. Specify URL and Reel Count
-Generate the top 3 viral reels from a YouTube video:
+### Step 2: Create and Activate a Virtual Environment
 ```bash
-.venv/bin/python pipeline.py --url "https://www.youtube.com/watch?v=VIDEO_ID" --count 3
+# macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Windows (Command Prompt)
+python -m venv .venv
+.venv\Scripts\activate
+
+# Windows (PowerShell)
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 ```
 
-### 3. Choose AI Engine
-Force the pipeline to use Gemini or Anthropic Claude:
+### Step 3: Install Dependencies
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Step 4: Configure Environment Variables
+Copy the example environment file and add your API keys:
+```bash
+cp .env.example .env
+```
+Open `.env` in any text editor and fill in your keys:
+```env
+# Google Gemini API Key (https://aistudio.google.com/app/apikey)
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Anthropic Claude API Key (https://console.anthropic.com/)
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Optional: Override default models
+# GEMINI_MODEL=gemini-2.5-flash
+# ANTHROPIC_MODEL=claude-3-7-sonnet-20250219
+```
+
+> **Note**: You only need **one** API key (Gemini or Claude) to start. If both are provided, the app will automatically fall back if one encounters rate limits.
+
+---
+
+## 🚀 Running the Application
+
+### Option 1: Launch the Web Studio (Recommended)
+
+Start the local web server:
+```bash
+python server/run_web.py
+```
+Open your browser and navigate to:
+```
+http://localhost:8000
+```
+
+1. Paste any YouTube video URL.
+2. Select your desired number of reels (1 to 5) and click **✨ Find Viral Reels**.
+3. Inspect ranked moments, preview quotes, and adjust start/end times if desired.
+4. Click **Render 9:16 Reel** to generate the clip.
+5. Click the generated reel in the **Library** to preview it, download the `.mp4`, or publish directly to **YouTube Shorts**.
+
+---
+
+### Option 2: Command-Line Interface (CLI)
+
+#### Interactive Mode
+Run without arguments to be prompted for a URL:
+```bash
+python server/pipeline.py
+```
+
+#### Generate Top 3 Viral Reels
+```bash
+python server/pipeline.py --url "https://www.youtube.com/watch?v=VIDEO_ID" --count 3
+```
+
+#### Dry-Run Mode (Analyze Moments in Seconds Without Rendering Video)
+```bash
+python server/pipeline.py --url "https://youtu.be/VIDEO_ID" --dry-run
+```
+
+#### Choose Specific AI Engine
 ```bash
 # Use Google Gemini
-.venv/bin/python pipeline.py --url "https://youtu.be/VIDEO_ID" --engine gemini
+python server/pipeline.py --url "https://youtu.be/VIDEO_ID" --engine gemini
 
 # Use Anthropic Claude
-.venv/bin/python pipeline.py --url "https://youtu.be/VIDEO_ID" --engine anthropic
+python server/pipeline.py --url "https://youtu.be/VIDEO_ID" --engine anthropic
 ```
 
-### 4. Dry Run (Analyze Moments Without Rendering Video)
-Inspect the detected viral moments, scores, hooks, and timestamps in seconds without downloading or rendering:
-```bash
-.venv/bin/python pipeline.py --url "https://youtu.be/VIDEO_ID" --dry-run
-```
-
-### 5. Custom Duration & Options
-```bash
-.venv/bin/python pipeline.py \
-  --url "https://youtu.be/VIDEO_ID" \
-  --count 5 \
-  --min-duration 30 \
-  --max-duration 55 \
-  --output-dir ./my_reels
-```
+#### CLI Options Reference
+| Flag | Description | Default |
+| :--- | :--- | :--- |
+| `-u`, `--url` | YouTube video link (standard, shortened, or shorts) | *Prompted* |
+| `-c`, `--count` | Number of top viral moments to render | `3` |
+| `-e`, `--engine` | AI engine (`auto`, `gemini`, `anthropic`) | `auto` |
+| `--min-duration` | Minimum duration in seconds for each reel | `20.0` |
+| `--max-duration` | Maximum duration in seconds for each reel | `60.0` |
+| `-o`, `--output-dir` | Folder to save rendered reels | `./output_reels` |
+| `--dry-run` | Analyze transcript without downloading or rendering video | `False` |
 
 ---
 
-## 📁 Project Structure
+## 🔴 Direct YouTube Studio Upload Setup (Optional)
+
+If you want to link your YouTube account and publish Shorts directly from the web interface:
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a new project (e.g. `ViralReel Studio`).
+3. Enable the **YouTube Data API v3**:
+   - Navigate to **APIs & Services > Library**.
+   - Search for **YouTube Data API v3** and click **Enable**.
+4. Configure the **OAuth Consent Screen**:
+   - User Type: **External**.
+   - App Name: `ViralReel Studio`.
+   - Add your email under **Test Users** (important while your app is in testing status).
+5. Create **OAuth 2.0 Credentials**:
+   - Navigate to **APIs & Services > Credentials > Create Credentials > OAuth Client ID**.
+   - Application Type: **Web application**.
+   - **Authorized redirect URIs**: Add:
+     ```
+     http://localhost:8000/api/youtube/callback
+     ```
+6. Download the OAuth client JSON file and save it as **`client_secrets.json`** in the root directory of this repository:
+   ```bash
+   # In ai-pipeline/
+   client_secrets.json
+   ```
+7. Click **"Connect YouTube Studio"** in the top navigation of the Web Studio (or run `python server/auth_youtube.py`) and approve Google permissions in your browser.
+8. Once authorized, a green badge with your channel name will appear. You can now post any rendered reel straight to YouTube Shorts with 1 click!
+
+---
+
+## 📁 Project Architecture
 
 ```
 ai-pipeline/
-├── .env                # API keys (GEMINI_API_KEY, ANTHROPIC_API_KEY)
-├── config.py           # Project settings, model choices, resolutions
-├── downloader.py       # YouTube metadata & timestamped transcript extraction
-├── models.py           # Pydantic data schemas for viral moments & transcripts
-├── viral_detector.py   # AI virality analysis engine (Gemini & Anthropic)
-├── video_processor.py  # FFmpeg 9:16 vertical crop, hook banner, & ASS subtitles
-├── pipeline.py         # Rich CLI interface with tables and progress bars
-├── requirements.txt    # Project dependencies
-└── output_reels/       # Rendered vertical reels ready for posting
+├── server/
+│   ├── static/             # Web Studio UI (HTML/CSS/JS)
+│   │   ├── index.html      # Responsive single-page interface
+│   │   ├── style.css       # Dark-mode glassmorphic design system
+│   │   └── app.js          # Client-side reactivity, player & upload drawer
+│   ├── run_web.py          # Web Studio launcher script
+│   ├── server.py           # FastAPI application & REST endpoints
+│   ├── pipeline.py         # End-to-end viral detection & rendering pipeline
+│   ├── viral_detector.py   # Gemini & Claude virality analysis engine
+│   ├── video_processor.py  # FFmpeg 9:16 letterboxing & encoding
+│   ├── downloader.py       # YouTube metadata & transcript extraction (yt-dlp)
+│   ├── youtube_uploader.py # YouTube Data API v3 & OAuth 2.0 uploader
+│   ├── auth_youtube.py     # Standalone CLI authorization helper logic
+│   ├── config.py           # Environment config, directory paths & models
+│   ├── models.py           # Pydantic data schemas
+│   └── __init__.py         # Python package marker
+├── requirements.txt        # Python package dependencies
+├── .env.example            # Template for API credentials
+├── .gitignore              # Excludes secrets, virtual environments, and outputs
+├── LICENSE                 # MIT License
+├── README.md               # GitHub setup and usage guide
+└── output_reels/           # Directory where finished 9:16 vertical reels are saved
 ```
 
 ---
 
-## ⚙️ Command-Line Options Reference
+## ❓ Frequently Asked Questions & Troubleshooting
 
-| Argument | Short | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `--url` | `-u` | Prompted | YouTube video URL (standard, shortened, or shorts) |
-| `--count` | `-c` | `3` | Number of top viral moments to render |
-| `--engine` | `-e` | `auto` | AI engine: `auto`, `gemini`, or `anthropic` |
-| `--min-duration` | | `20.0` | Minimum duration in seconds for each reel |
-| `--max-duration` | | `60.0` | Maximum duration in seconds for each reel |
-| `--output-dir` | `-o` | `./output_reels`| Folder where rendered reels are saved |
-| `--no-subtitles` | | `False` | Disable burning stylized subtitles |
-| `--no-banner` | | `False` | Disable top hook headline banner |
-| `--dry-run` | | `False` | Show viral analysis table without rendering video |
+### 1. `FileNotFoundError: [Errno 2] No such file or directory: 'ffmpeg'`
+FFmpeg is not installed or not in your system's PATH.
+- Verify installation with `ffmpeg -version`.
+- On macOS, install with `brew install ffmpeg`.
+- On Linux, install with `sudo apt install ffmpeg`.
+- On Windows, install via `winget install Gyan.FFmpeg` and restart your terminal.
+
+### 2. "Could not extract transcript for video"
+Some videos disable transcripts or do not have speech audio. The pipeline will attempt to pull automatic speech recognition (ASR) captions. If no captions exist in any language, choose a video with speech or captions enabled.
+
+### 3. Google OAuth "Access blocked: This app has not been verified"
+During development in Google Cloud Console, your app is in "Testing" mode. Make sure your personal Google account email is added under **OAuth consent screen > Test users**.
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
