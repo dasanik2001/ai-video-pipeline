@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Purple to Electric Blue Gradient -->
+    <linearGradient id="bgGradient" x1="15%" y1="10%" x2="85%" y2="90%">
+      <stop offset="0%" stop-color="#9333EA" />
+      <stop offset="45%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+
+    <!-- Golden Lightning Gradient -->
+    <linearGradient id="boltGrad" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" stop-color="#FFFBEB" />
+      <stop offset="30%" stop-color="#FEF08A" />
+      <stop offset="70%" stop-color="#FBBF24" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+
+    <!-- Warm Golden Glow Filter -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.2" result="blur" />
+      <feColorMatrix type="matrix" values="
+        1 0 0 0 1
+        0 0.8 0 0 0.8
+        0 0 0 0 0.2
+        0 0 0 0.7 0" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base with smooth rounded corners -->
+  <rect x="2" y="2" width="60" height="60" rx="17" fill="url(#bgGradient)" />
+
+  <!-- Subtle ambient inner highlight for premium 3D depth -->
+  <rect x="2.5" y="2.5" width="59" height="59" rx="16.5" fill="none" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1" />
+
+  <!-- Outer Glow for Bolt -->
+  <path d="M35 15 L22 34 L32 34 L28 49 L42 30 L32 30 Z" fill="#F59E0B" filter="url(#glow)" opacity="0.65" />
+
+  <!-- Glowing Golden Lightning Bolt -->
+  <path d="M35 15 L22 34 L32 34 L28 49 L42 30 L32 30 Z" 
+        fill="url(#boltGrad)" 
+        stroke="#D97706" 
+        stroke-width="1.2" 
+        stroke-linejoin="round" />
+</svg>

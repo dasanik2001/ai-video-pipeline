@@ -54,6 +54,13 @@ app.mount("/output", StaticFiles(directory=str(OUTPUT_DIR)), name="output")
 # Mount static UI assets
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
+@app.api_route("/favicon.ico", methods=["GET", "HEAD"], include_in_schema=False)
+async def favicon():
+    fav_svg = STATIC_DIR / "favicon.svg"
+    if fav_svg.exists():
+        return FileResponse(fav_svg, media_type="image/svg+xml")
+    return FileResponse(STATIC_DIR / "favicon.png", media_type="image/png")
+
 class AnalyzeRequest(BaseModel):
     url: str
     count: int = 3
