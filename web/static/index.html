@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ViralReel AI — YouTube to 9:16 Viral Shorts & Reels Studio</title>
+  <meta name="description" content="Transform long YouTube videos into viral TikTok, Instagram Reels, and YouTube Shorts using Gemini 3.8 and Claude AI.">
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Vanilla CSS Stylesheet with cache busting -->
+  <link rel="stylesheet" href="/static/style.css?v=20260927_3">
+</head>
+<body>
+  <!-- Ambient background lighting effects -->
+  <div class="ambient-glow glow-top-left" aria-hidden="true"></div>
+  <div class="ambient-glow glow-top-right" aria-hidden="true"></div>
+  <div class="ambient-glow glow-center" aria-hidden="true"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <span class="logo-bolt">⚡</span>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">ViralReel <span class="gradient-text">AI</span></h1>
+          <p class="brand-subtitle">Autonomous 9:16 Shorts & Reels Generator</p>
+        </div>
+      </div>
+      
+      <div class="header-badges">
+        <div id="gemini-status-badge" class="status-badge" title="Gemini Status">
+          <span class="status-dot"></span>
+          <span class="status-label">Gemini 3.8</span>
+        </div>
+        <div id="anthropic-status-badge" class="status-badge" title="Anthropic Status">
+          <span class="status-dot"></span>
+          <span class="status-label">Claude 3.7</span>
+        </div>
+        <button id="youtube-connect-btn" class="youtube-account-badge" onclick="handleYouTubeConnectClick()" title="Link YouTube Studio Account">
+          <span class="yt-icon">🔴</span>
+          <span id="youtube-account-label">Connect YouTube Studio</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="main-container">
+
+    <!-- Input Hero Card -->
+    <section class="hero-card glass-panel" aria-label="YouTube Video Input">
+      <div class="hero-badge">
+        <span class="sparkle-icon">✨</span> AI Virality Detection Engine
+      </div>
+      <h2 class="hero-title">Turn Any YouTube Video Into <span class="gradient-text">Viral 9:16 Reels</span></h2>
+      <p class="hero-desc">Extract high-curiosity 3-second hooks, perfect retention pacing, and auto-render 9:16 vertical clips with TikTok subtitles.</p>
+
+      <form id="analyze-form" class="url-input-form" onsubmit="event.preventDefault(); handleAnalyze();">
+        <div class="input-wrapper">
+          <div class="input-icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </div>
+          <input 
+            type="url" 
+            id="youtube-url-input" 
+            class="url-input" 
+            placeholder="Paste YouTube link here (e.g. https://www.youtube.com/watch?v=...)" 
+            required 
+            autocomplete="off"
+          />
+          <button type="button" id="paste-btn" class="paste-btn" title="Paste from clipboard" onclick="handlePasteClipboard()">
+            📋 Paste
+          </button>
+        </div>
+
+        <!-- Controls Row -->
+        <div class="controls-row">
+          <div class="control-group">
+            <label for="engine-select" class="control-label">AI Engine</label>
+            <select id="engine-select" class="control-select">
+              <option value="auto">Auto (Gemini 3.8 / Claude)</option>
+              <option value="gemini" selected>Google Gemini 3.8 Flash</option>
+              <option value="anthropic">Anthropic Claude 3.7 Sonnet</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="clips-count-select" class="control-label">Viral Clips</label>
+            <select id="clips-count-select" class="control-select">
+              <option value="1">Top 1 Reel</option>
+              <option value="2">Top 2 Reels</option>
+              <option value="3" selected>Top 3 Reels</option>
+              <option value="5">Top 5 Reels</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="min-duration-input" class="control-label">Min (s)</label>
+            <input type="number" id="min-duration-input" class="control-input-number" value="20" min="10" max="60" />
+          </div>
+
+          <div class="control-group">
+            <label for="max-duration-input" class="control-label">Max (s)</label>
+            <input type="number" id="max-duration-input" class="control-input-number" value="60" min="20" max="90" />
+          </div>
+
+          <div class="control-toggles">
+            <span class="max-res-badge" title="Always rendered in maximum source resolution">💎 Max Res</span>
+            <label class="toggle-container" title="Burn external subtitles into video">
+              <input type="checkbox" id="subtitles-toggle" />
+              <span class="toggle-slider"></span>
+              <span class="toggle-text">Subtitles</span>
+            </label>
+            <label class="toggle-container" title="Add top hook banner headline">
+              <input type="checkbox" id="banner-toggle" />
+              <span class="toggle-slider"></span>
+              <span class="toggle-text">Hook Banner</span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" id="analyze-btn" class="primary-btn">
+          <span class="btn-icon">⚡</span>
+          <span class="btn-text">Detect Viral Moments</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- Loading State -->
+    <section id="loading-section" class="loading-section glass-panel hidden" aria-live="polite">
+      <div class="spinner-wrapper">
+        <div class="cyber-spinner"></div>
+      </div>
+      <h3 id="loading-title" class="loading-title">Analyzing Virality Patterns...</h3>
+      <p id="loading-desc" class="loading-desc">Fetching transcript and running retention curve analysis with Gemini 3.8 Flash.</p>
+      <div class="progress-bar-container">
+        <div id="progress-bar-fill" class="progress-bar-fill"></div>
+      </div>
+    </section>
+
+    <!-- Video Overview Panel (Shown after analysis) -->
+    <section id="video-overview-section" class="video-overview glass-panel hidden" aria-label="Video Overview">
+      <div class="video-overview-content">
+        <img id="video-thumb" class="video-thumb" src="" alt="Video thumbnail" />
+        <div class="video-meta">
+          <div class="video-tags">
+            <span id="video-channel" class="meta-tag channel-tag">Channel</span>
+            <span id="video-duration" class="meta-tag duration-tag">00:00</span>
+            <span id="video-transcript-words" class="meta-tag words-tag">0 words</span>
+          </div>
+          <h3 id="video-title" class="overview-title">Video Title</h3>
+          <p id="video-summary" class="overview-summary">Video summary...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detected Viral Moments Section -->
+    <section id="moments-section" class="moments-section hidden" aria-label="Detected Viral Moments">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">🔥 Ranked Viral Moments</h2>
+          <p class="section-subtitle">Ranked by algorithmic retention, curiosity hooks, and standalone value.</p>
+        </div>
+        <button id="render-all-btn" class="secondary-btn" onclick="handleRenderAll()">
+          🎬 Render All Reels
+        </button>
+      </div>
+
+      <div id="moments-grid" class="moments-grid">
+        <!-- Dynamic Viral Cards Injected via JS -->
+      </div>
+    </section>
+
+    <!-- Previously Generated Reels Gallery -->
+    <section id="gallery-section" class="gallery-section glass-panel" aria-label="Generated Reels Gallery">
+      <div class="gallery-header">
+        <div>
+          <h2 class="section-title">📂 Generated Reels Library</h2>
+          <p class="section-subtitle">Browse and download your ready-to-post 9:16 vertical videos.</p>
+        </div>
+        <button id="refresh-gallery-btn" class="icon-refresh-btn" title="Refresh library" onclick="loadReelsGallery()">
+          🔄 Refresh
+        </button>
+      </div>
+
+      <div id="gallery-grid" class="gallery-grid">
+        <!-- Rendered Reels Injected Here -->
+      </div>
+      <div id="gallery-empty" class="gallery-empty">
+        <p>No reels generated yet. Paste a YouTube link above to create your first reel!</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Video Preview Modal -->
+  <div id="video-modal" class="video-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-reel-title">
+    <div class="video-modal-backdrop" onclick="closeVideoModal()"></div>
+    <div class="modal-box glass-panel">
+      <button type="button" class="modal-close-btn" onclick="closeVideoModal()" aria-label="Close modal">✕</button>
+      <div class="modal-content">
+        <!-- 9:16 Vertical Video Player Container -->
+        <div class="player-wrapper">
+          <video id="modal-video-player" class="reel-player" controls autoplay playsinline loop></video>
+        </div>
+        <!-- Reel Details & Actions -->
+        <div class="modal-sidebar">
+          <div class="modal-badge">
+            <span id="modal-score-badge" class="score-pill">95/100</span>
+            <span id="modal-duration-badge" class="meta-pill">35.0s</span>
+          </div>
+          <h3 id="modal-reel-title" class="modal-title">Reel Title</h3>
+          <div class="hook-preview-box">
+            <span class="hook-label">HOOK TEXT BANNER</span>
+            <p id="modal-hook-text" class="hook-text">"HOOK GOES HERE"</p>
+          </div>
+          <div class="action-buttons-group">
+            <a id="modal-download-btn" class="primary-btn download-btn" href="#" download>
+              ⬇️ Download 9:16 Reel (.mp4)
+            </a>
+            <button id="modal-upload-toggle-btn" class="youtube-action-btn" onclick="toggleUploadDrawer()">
+              <span class="btn-yt-icon">🔴</span> Upload to YouTube Shorts
+            </button>
+            <button class="secondary-btn" onclick="copyHookToClipboard()">
+              📋 Copy Hook Headline
+            </button>
+          </div>
+
+          <!-- YouTube Upload Drawer -->
+          <div id="modal-upload-drawer" class="upload-drawer hidden">
+            <div class="drawer-header">
+              <span class="drawer-title">🚀 Post Directly to YouTube Shorts</span>
+            </div>
+            <div class="drawer-field">
+              <div class="field-label-row">
+                <label for="yt-upload-title" class="drawer-label">Short Title</label>
+                <button type="button" class="ai-rewrite-btn" onclick="generateViralCopy()">✨ AI Rewrite</button>
+              </div>
+              <input type="text" id="yt-upload-title" class="drawer-input" placeholder="Catchy title #Shorts" maxlength="100" />
+              <div id="yt-title-suggestions" class="title-suggestions-container hidden"></div>
+            </div>
+            <div class="drawer-field">
+              <div class="field-label-row">
+                <label for="yt-upload-desc" class="drawer-label">Description & Hashtags</label>
+              </div>
+              <textarea id="yt-upload-desc" class="drawer-textarea" rows="4" placeholder="Engaging description with #Shorts"></textarea>
+            </div>
+            <div class="drawer-controls-row">
+              <div class="drawer-field flex-1">
+                <label for="yt-upload-privacy" class="drawer-label">Visibility</label>
+                <select id="yt-upload-privacy" class="drawer-select">
+                  <option value="public" selected>Public (Instant Release)</option>
+                  <option value="unlisted">Unlisted (Anyone with link)</option>
+                  <option value="private">Private (Only You)</option>
+                </select>
+              </div>
+              <button id="yt-confirm-upload-btn" class="yt-upload-submit-btn" onclick="executeYouTubeUpload()">
+                🚀 Publish Short
+              </button>
+            </div>
+            <div id="yt-upload-status" class="upload-status-box hidden"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YouTube Studio OAuth Setup Modal -->
+  <div id="youtube-setup-modal" class="video-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="yt-setup-title">
+    <div class="video-modal-backdrop" onclick="closeYouTubeSetupModal()"></div>
+    <div class="modal-box glass-panel setup-modal-box">
+      <button type="button" class="modal-close-btn" onclick="closeYouTubeSetupModal()" aria-label="Close modal">✕</button>
+      <div class="setup-modal-header">
+        <span class="setup-icon">🔴</span>
+        <h3 id="yt-setup-title" class="setup-title">Link YouTube Studio Account</h3>
+      </div>
+      <p class="setup-desc">
+        To upload shorts directly to your YouTube channel, Google requires OAuth 2.0 Client credentials (one-time quick setup).
+      </p>
+
+      <div class="setup-steps">
+        <div class="step-item">
+          <span class="step-num">1</span>
+          <div>
+            <strong>Create OAuth Credentials:</strong>
+            <p>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="step-link">Google Cloud Console</a>, create an <strong>OAuth Client ID</strong> (Application type: <em>Web application</em>), and set Authorized Redirect URI to:</p>
+            <code class="uri-code">http://localhost:8000/api/youtube/callback</code>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-num">2</span>
+          <div>
+            <strong>Enable YouTube API:</strong>
+            <p>In APIs & Services, enable <strong>YouTube Data API v3</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <span class="step-num">3</span>
+          <div>
+            <strong>Upload client_secrets.json:</strong>
+            <p>Download the OAuth client JSON from Google Cloud Console and paste its content below:</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="secrets-input-box">
+        <textarea id="secrets-json-input" class="secrets-textarea" rows="5" placeholder='Paste contents of client_secrets.json here (e.g. {"web": {"client_id": "...", ...}})'></textarea>
+        <button id="save-secrets-btn" class="primary-btn save-secrets-btn" onclick="handleSaveClientSecrets()">
+          💾 Save & Authorize Channel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- JavaScript Application Logic with cache busting -->
+  <script src="/static/app.js?v=20260927_3"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+temp/
+output_reels/
+.DS_Store
+client_secrets.json
+youtube_token.json

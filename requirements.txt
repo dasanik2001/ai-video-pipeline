@@ -1,0 +1,12 @@
+yt-dlp>=2026.8.19
+google-genai>=2.25.0
+anthropic>=1.8.0
+youtube-transcript-api>=1.2.4
+python-dotenv>=1.2.3
+rich>=15.0.0
+pydantic>=2.13.5
+fastapi>=0.141.0
+uvicorn>=0.54.0
+google-api-python-client>=2.200.0
+google-auth-oauthlib>=1.4.0
+google-auth-httplib2>=0.4.0
