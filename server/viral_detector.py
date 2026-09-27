@@ -19,13 +19,14 @@ SYSTEM_PROMPT = """You are an elite short-form video producer, viral strategist,
 Your objective is to analyze a timestamped transcript of a video and identify the highest potential viral segments to cut into vertical 9:16 reels.
 
 VIRALITY CRITERIA (Score 1-100):
-1. **The 3-Second Hook**: The clip must start with a captivating sentence, controversial statement, shocking counter-intuitive truth, high-stakes question, or intriguing mystery. Reject any clip that starts with slow pleasantries ("So today we...", "Thanks for having me").
+1. **The 3-Second Hook**: The clip must start with a captivating sentence, controversial statement, shocking counter-intuitive truth, high-stakes question, or intriguing mystery. Reject clips that start with slow pleasantries.
 2. **Pacing & High Retention**: High energy, no filler, maximum value or emotional payoff per second.
 3. **Standalone Value**: The clip must make complete sense on its own. The viewer should never need context from before or after the clip.
 4. **Clean Cut Boundaries**:
    - MUST start cleanly at the very beginning of a punchy sentence.
    - MUST end cleanly at the end of a sentence (a punchline, mic-drop conclusion, or intriguing takeaway). Never cut off a speaker mid-word or mid-sentence.
 5. **Length Constraints**: Each segment MUST strictly be between {min_duration} and {max_duration} seconds.
+6. **MANDATORY EXACT OUTPUT COUNT**: You MUST identify and return EXACTLY {count} distinct, non-overlapping viral moments in the viral_moments array. Never return fewer than {count} moments under any circumstances unless the entire video is shorter than {min_duration} seconds.
 
 Output must strictly follow the required JSON structure.
 """
@@ -39,12 +40,16 @@ Here is the timestamped transcript:
 {formatted_transcript}
 ---
 
-Find the top {count} segments that have the highest probability of going viral on Instagram Reels, TikTok, and YouTube Shorts.
-CRITICAL CONSTRAINT:
+CRITICAL QUANTITY REQUIREMENT:
+You MUST identify and return EXACTLY {count} distinct viral moments in the `viral_moments` list.
+Do NOT return only 1 or 2 moments. Explore the entire video timeline (early setup, key dialogue/conflict, emotional climax, resolution) to produce all {count} unique segments.
+
+CRITICAL TIMESTAMP CONSTRAINTS:
 - The video duration is {duration} seconds.
 - Both start_time and end_time MUST be strictly within [0, {duration}] seconds. Never output a timestamp exceeding {duration} seconds.
+- Each segment duration (end_time - start_time) must be between {min_duration} and {max_duration} seconds.
 
-For each segment:
+For each of the {count} segments:
 - `title`: Catchy, punchy title for this reel.
 - `hook`: Engaging text overlay for the top of the video (in ALL CAPS, max 7 words, e.g. "HOW MILLIONAIRES THINK DIFFERENTLY").
 - `start_time`: Precise start timestamp in seconds (must align with sentence boundary and be < {duration}).
@@ -54,7 +59,7 @@ For each segment:
 - `reason`: Concrete breakdown of why this moment will hook the viewer and hold retention.
 - `key_quote`: The most impactful quote in the segment.
 
-Rank the moments from highest viral score to lowest.
+Rank the {count} moments from highest viral score to lowest.
 """
 
 def analyze_with_gemini(
@@ -75,7 +80,7 @@ def analyze_with_gemini(
 
     client = genai.Client(api_key=key)
 
-    system_instruction = SYSTEM_PROMPT.format(min_duration=min_duration, max_duration=max_duration)
+    system_instruction = SYSTEM_PROMPT.format(min_duration=min_duration, max_duration=max_duration, count=count)
     prompt = USER_PROMPT_TEMPLATE.format(
         title=title,
         uploader=uploader,
@@ -86,8 +91,15 @@ def analyze_with_gemini(
         max_duration=max_duration,
     )
 
-    candidate_models = [model_name, "gemini-3.8-flash", "gemini-3.1-flash-lite", "gemini-flash-latest"]
-    # Deduplicate while preserving order
+    candidate_models = [
+        model_name,
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-flash",
+        "gemini-3.8-flash",
+        "gemini-3.1-flash-lite",
+        "gemini-flash-latest"
+    ]
     seen = set()
     models_to_try = [m for m in candidate_models if not (m in seen or seen.add(m))]
 
@@ -104,7 +116,7 @@ def analyze_with_gemini(
                         system_instruction=system_instruction,
                         response_mime_type="application/json",
                         response_schema=AnalysisResponse,
-                        temperature=0.3,
+                        temperature=0.4,
                     ),
                 )
                 if response and response.text:
@@ -112,7 +124,7 @@ def analyze_with_gemini(
             except Exception as e:
                 last_error = e
                 import time
-                time.sleep(1.5)
+                time.sleep(1.0)
         if response and response.text:
             break
 
@@ -129,7 +141,7 @@ def analyze_with_gemini(
             if m.start_time < duration:
                 m.end_time = min(m.end_time, duration)
                 m.duration = round(m.end_time - m.start_time, 1)
-                if m.duration >= 10.0:
+                if m.duration >= 8.0:
                     valid_moments.append(m)
         result.viral_moments = valid_moments
         return result
@@ -155,7 +167,7 @@ def analyze_with_anthropic(
 
     client = anthropic.Anthropic(api_key=key)
 
-    system_instruction = SYSTEM_PROMPT.format(min_duration=min_duration, max_duration=max_duration)
+    system_instruction = SYSTEM_PROMPT.format(min_duration=min_duration, max_duration=max_duration, count=count)
     prompt = USER_PROMPT_TEMPLATE.format(
         title=title,
         uploader=uploader,
@@ -171,26 +183,23 @@ def analyze_with_anthropic(
     response = client.messages.create(
         model=model_name,
         max_tokens=4000,
-        temperature=0.3,
         system=system_instruction,
         messages=[{"role": "user", "content": prompt}],
     )
 
     raw_text = response.content[0].text
-    # Clean json formatting if wrapped in codeblocks
     cleaned_json = re.sub(r'^```json\s*', '', raw_text.strip(), flags=re.MULTILINE)
     cleaned_json = re.sub(r'```$', '', cleaned_json.strip(), flags=re.MULTILINE)
 
     try:
         data = json.loads(cleaned_json)
         result = AnalysisResponse.model_validate(data)
-        # Validate and clamp moments within video duration
         valid_moments = []
         for m in result.viral_moments:
             if m.start_time < duration:
                 m.end_time = min(m.end_time, duration)
                 m.duration = round(m.end_time - m.start_time, 1)
-                if m.duration >= 10.0:
+                if m.duration >= 8.0:
                     valid_moments.append(m)
         result.viral_moments = valid_moments
         return result
@@ -209,37 +218,54 @@ def detect_viral_moments(
     engine: str = "auto",
 ) -> AnalysisResponse:
     """
-    Selects the appropriate AI engine (Gemini or Anthropic) and runs viral moment detection.
+    Selects the appropriate AI engine with automatic cross-engine fallback (Gemini <-> Claude).
     """
     chosen_engine = engine.lower()
 
-    if chosen_engine == "auto":
+    # Determine order of engines to try
+    engines_to_try = []
+    if chosen_engine == "gemini":
+        engines_to_try = ["gemini", "anthropic"]
+    elif chosen_engine == "anthropic":
+        engines_to_try = ["anthropic", "gemini"]
+    else:  # auto
         if GEMINI_API_KEY:
-            chosen_engine = "gemini"
-        elif ANTHROPIC_API_KEY:
-            chosen_engine = "anthropic"
-        else:
+            engines_to_try.append("gemini")
+        if ANTHROPIC_API_KEY:
+            engines_to_try.append("anthropic")
+        if not engines_to_try:
             raise ValueError("Neither GEMINI_API_KEY nor ANTHROPIC_API_KEY found in environment or .env file.")
 
-    if chosen_engine == "gemini":
-        return analyze_with_gemini(
-            title=title,
-            uploader=uploader,
-            duration=duration,
-            formatted_transcript=formatted_transcript,
-            count=count,
-            min_duration=min_duration,
-            max_duration=max_duration,
-        )
-    elif chosen_engine == "anthropic":
-        return analyze_with_anthropic(
-            title=title,
-            uploader=uploader,
-            duration=duration,
-            formatted_transcript=formatted_transcript,
-            count=count,
-            min_duration=min_duration,
-            max_duration=max_duration,
-        )
-    else:
-        raise ValueError(f"Unknown engine '{engine}'. Choose 'gemini', 'anthropic', or 'auto'.")
+    last_error = None
+    for eng in engines_to_try:
+        try:
+            if eng == "gemini" and GEMINI_API_KEY:
+                res = analyze_with_gemini(
+                    title=title,
+                    uploader=uploader,
+                    duration=duration,
+                    formatted_transcript=formatted_transcript,
+                    count=count,
+                    min_duration=min_duration,
+                    max_duration=max_duration,
+                )
+            elif eng == "anthropic" and ANTHROPIC_API_KEY:
+                res = analyze_with_anthropic(
+                    title=title,
+                    uploader=uploader,
+                    duration=duration,
+                    formatted_transcript=formatted_transcript,
+                    count=count,
+                    min_duration=min_duration,
+                    max_duration=max_duration,
+                )
+            else:
+                continue
+
+            if res and len(res.viral_moments) > 0:
+                return res
+        except Exception as e:
+            last_error = e
+            continue
+
+    raise RuntimeError(f"All AI virality detection attempts failed: {last_error}")

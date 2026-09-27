@@ -1,3 +1,4 @@
+import sys
 import subprocess
 import re
 from pathlib import Path
@@ -175,16 +176,11 @@ def render_reel(
         )
 
     # Preserve FULL WIDTH: scale to fit 9:16 canvas and pad with black bars on top and bottom
-    w, h = get_video_dimensions(source_video_path)
-    if w >= 3840 or h >= 2160:
-        canvas_w, canvas_h = 2160, 3840  # 4K Vertical
-    elif w >= 2560 or h >= 1440:
-        canvas_w, canvas_h = 1440, 2560  # 2K Vertical
-    else:
-        canvas_w, canvas_h = 1080, 1920  # Full HD Vertical
+    # Standardize to 1080x1920 for maximum encoding speed and Shorts/Reels spec compliance
+    canvas_w, canvas_h = 1080, 1920
 
     filter_parts = [
-        f"scale={canvas_w}:{canvas_h}:force_original_aspect_ratio=decrease:flags=lanczos",
+        f"scale={canvas_w}:{canvas_h}:force_original_aspect_ratio=decrease:flags=bicubic",
         f"pad={canvas_w}:{canvas_h}:(ow-iw)/2:(oh-ih)/2:black"
     ]
 
@@ -197,6 +193,23 @@ def render_reel(
 
     temp_render_path = output_file.with_suffix(".rendering.mp4")
 
+    # Hardware acceleration check for macOS (Apple Silicon / VideoToolbox)
+    is_macos = sys.platform == "darwin"
+    if is_macos:
+        vcodec_opts = [
+            "-c:v", "h264_videotoolbox",
+            "-b:v", "8M",
+            "-maxrate", "12M",
+            "-bufsize", "16M",
+            "-allow_sw", "1"
+        ]
+    else:
+        vcodec_opts = [
+            "-c:v", "libx264",
+            "-preset", "veryfast",
+            "-crf", "20"
+        ]
+
     cmd = [
         "ffmpeg",
         "-y",
@@ -204,11 +217,9 @@ def render_reel(
         "-to", str(moment.end_time),
         "-i", str(source_video_path),
         "-vf", vf_chain,
-        "-c:v", "libx264",
-        "-preset", "medium",
-        "-crf", "18",
+        *vcodec_opts,
         "-c:a", "aac",
-        "-b:a", "320k",
+        "-b:a", "192k",
         "-pix_fmt", "yuv420p",
         "-movflags", "+faststart",
         str(temp_render_path),
